@@ -328,9 +328,38 @@ final class CalendarPopoverViewController: NSViewController {
 
     private func openCalendar(on date: Date) {
         dismissPanel()
-        let startOfDay = Calendar.autoupdatingCurrent.startOfDay(for: date)
-        guard let url = URL(string: "calshow:\(startOfDay.timeIntervalSinceReferenceDate)") else { return }
-        NSWorkspace.shared.open(url)
+        let components = Calendar.autoupdatingCurrent.dateComponents([.year, .month, .day], from: date)
+        guard let year = components.year, let month = components.month, let day = components.day else {
+            openCalendarApp()
+            return
+        }
+
+        let source = """
+        set targetDate to current date
+        set day of targetDate to 1
+        set year of targetDate to \(year)
+        set month of targetDate to \(month)
+        set day of targetDate to \(day)
+        set time of targetDate to 0
+        tell application id "com.apple.iCal"
+            activate
+            view calendar at targetDate
+        end tell
+        """
+
+        var error: NSDictionary?
+        guard NSAppleScript(source: source)?.executeAndReturnError(&error) != nil else {
+            openCalendarApp()
+            return
+        }
+    }
+
+    private func openCalendarApp() {
+        guard let calendarURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.iCal") else { return }
+        NSWorkspace.shared.openApplication(
+            at: calendarURL,
+            configuration: NSWorkspace.OpenConfiguration()
+        )
     }
 
     private func separator() -> NSBox {

@@ -15,9 +15,9 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.2.0</string>
+    <string>0.2.1</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <key>LSUIElement</key>
@@ -26,5 +26,7 @@
     <true/>
     <key>NSCalendarsFullAccessUsageDescription</key>
     <string>Word Clock shows your next calendar events and lets you quickly open or join them.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Word Clock uses Calendar automation to open the day you select.</string>
 </dict>
 </plist>

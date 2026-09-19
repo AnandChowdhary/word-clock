@@ -56,6 +56,8 @@ Calendar integration is optional. When enabled, Word Clock reads events locally 
 
 If an event contains a supported meeting URL in its URL, location, or notes, clicking it opens that link. Otherwise, clicking the event opens Calendar.
 
+Clicking a day uses Calendar's native automation command to show that date. macOS may ask for permission to control Calendar the first time you use it.
+
 ## Project structure
 
 ```text
