@@ -9,7 +9,8 @@ A small, native macOS menu-bar clock that writes the current time in words and k
 ## Highlights
 
 - Speaks the time naturally, such as **“ten past four”** or **“quarter to five”**
-- Shows a compact month calendar with optional ISO week numbers
+- Shows a compact, browsable month calendar with optional ISO week numbers
+- Opens Calendar on the selected day when you click a date
 - Lists up to five upcoming Calendar events
 - Opens Google Meet, Zoom, Microsoft Teams, Webex, and Whereby links directly
 - Opens other events in the system Calendar app

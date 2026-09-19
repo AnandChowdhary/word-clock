@@ -4,13 +4,15 @@ final class CalendarMonthView: NSView {
     private var calendar = Calendar.autoupdatingCurrent
     private var displayedMonth: Date
     private var selectedDate = Date.now
+    private let monthLabel = NSTextField(labelWithString: "")
     private var dayButtons: [CalendarDayButton] = []
     private var weekLabels: [NSTextField] = []
     private var weekColumn: NSStackView!
     private var weekDivider: NSBox!
+    var onSelectDate: ((Date) -> Void)?
 
     override var intrinsicContentSize: NSSize {
-        NSSize(width: 218, height: 158)
+        NSSize(width: 218, height: 190)
     }
 
     override init(frame frameRect: NSRect) {
@@ -28,12 +30,54 @@ final class CalendarMonthView: NSView {
         updateMonth()
     }
 
+    func refreshToday() {
+        if calendar.isDate(selectedDate, inSameDayAs: .now) {
+            selectedDate = .now
+        }
+        updateMonth()
+    }
+
     func setShowsWeekNumbers(_ showsWeekNumbers: Bool) {
         weekColumn.isHidden = !showsWeekNumbers
         weekDivider.isHidden = !showsWeekNumbers
     }
 
     private func buildView() {
+        monthLabel.font = .systemFont(ofSize: 12, weight: .semibold)
+        monthLabel.textColor = .labelColor
+        monthLabel.alignment = .center
+
+        let previousButton = monthNavigationButton(
+            symbol: "chevron.left",
+            accessibilityLabel: "Previous month",
+            action: #selector(showPreviousMonth)
+        )
+        let nextButton = monthNavigationButton(
+            symbol: "chevron.right",
+            accessibilityLabel: "Next month",
+            action: #selector(showNextMonth)
+        )
+
+        let monthHeader = NSView()
+        [previousButton, monthLabel, nextButton].forEach(monthHeader.addSubview)
+        [previousButton, monthLabel, nextButton].forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+        NSLayoutConstraint.activate([
+            monthHeader.widthAnchor.constraint(equalToConstant: 218),
+            monthHeader.heightAnchor.constraint(equalToConstant: 24),
+            previousButton.leadingAnchor.constraint(equalTo: monthHeader.leadingAnchor),
+            previousButton.centerYAnchor.constraint(equalTo: monthHeader.centerYAnchor),
+            previousButton.widthAnchor.constraint(equalToConstant: 24),
+            previousButton.heightAnchor.constraint(equalToConstant: 24),
+            monthLabel.centerXAnchor.constraint(equalTo: monthHeader.centerXAnchor),
+            monthLabel.centerYAnchor.constraint(equalTo: monthHeader.centerYAnchor),
+            monthLabel.leadingAnchor.constraint(greaterThanOrEqualTo: previousButton.trailingAnchor, constant: 4),
+            nextButton.trailingAnchor.constraint(equalTo: monthHeader.trailingAnchor),
+            nextButton.centerYAnchor.constraint(equalTo: monthHeader.centerYAnchor),
+            nextButton.widthAnchor.constraint(equalToConstant: 24),
+            nextButton.heightAnchor.constraint(equalToConstant: 24),
+            monthLabel.trailingAnchor.constraint(lessThanOrEqualTo: nextButton.leadingAnchor, constant: -4)
+        ])
+
         let weekdayGrid = NSGridView(views: [weekdayLabels()])
         weekdayGrid.columnSpacing = 1
         weekdayGrid.rowSpacing = 0
@@ -88,9 +132,14 @@ final class CalendarMonthView: NSView {
         weekDivider.translatesAutoresizingMaskIntoConstraints = false
         weekDivider.widthAnchor.constraint(equalToConstant: 1).isActive = true
 
-        let content = NSStackView(views: [weekColumn, weekDivider, dateColumns])
-        content.orientation = .horizontal
-        content.alignment = .top
+        let calendarGrid = NSStackView(views: [weekColumn, weekDivider, dateColumns])
+        calendarGrid.orientation = .horizontal
+        calendarGrid.alignment = .top
+        calendarGrid.spacing = 8
+
+        let content = NSStackView(views: [monthHeader, calendarGrid])
+        content.orientation = .vertical
+        content.alignment = .centerX
         content.spacing = 8
         addSubview(content)
         content.translatesAutoresizingMaskIntoConstraints = false
@@ -100,8 +149,19 @@ final class CalendarMonthView: NSView {
             content.leadingAnchor.constraint(equalTo: leadingAnchor),
             content.trailingAnchor.constraint(equalTo: trailingAnchor),
             content.bottomAnchor.constraint(equalTo: bottomAnchor),
-            weekDivider.heightAnchor.constraint(equalTo: content.heightAnchor)
+            weekDivider.heightAnchor.constraint(equalTo: calendarGrid.heightAnchor)
         ])
+    }
+
+    private func monthNavigationButton(symbol: String, accessibilityLabel: String, action: Selector) -> NSButton {
+        let button = NSButton(image: NSImage(systemSymbolName: symbol, accessibilityDescription: accessibilityLabel)!, target: self, action: action)
+        button.isBordered = false
+        button.imageScaling = .scaleProportionallyDown
+        button.contentTintColor = .secondaryLabelColor
+        button.focusRingType = .none
+        button.toolTip = accessibilityLabel
+        button.setAccessibilityLabel(accessibilityLabel)
+        return button
     }
 
     private func weekdayLabels() -> [NSView] {
@@ -124,6 +184,7 @@ final class CalendarMonthView: NSView {
     }
 
     private func updateMonth() {
+        monthLabel.stringValue = displayedMonth.formatted(Date.FormatStyle().month(.wide).year())
         let firstWeekday = calendar.component(.weekday, from: displayedMonth)
         let leadingDays = (firstWeekday - calendar.firstWeekday + 7) % 7
 
@@ -147,6 +208,17 @@ final class CalendarMonthView: NSView {
 
     @objc private func selectDate(_ sender: CalendarDayButton) {
         selectedDate = sender.date
+        updateMonth()
+        onSelectDate?(sender.date)
+    }
+
+    @objc private func showPreviousMonth() {
+        displayedMonth = calendar.date(byAdding: .month, value: -1, to: displayedMonth) ?? displayedMonth
+        updateMonth()
+    }
+
+    @objc private func showNextMonth() {
+        displayedMonth = calendar.date(byAdding: .month, value: 1, to: displayedMonth) ?? displayedMonth
         updateMonth()
     }
 }

@@ -91,7 +91,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
               let panel else { return }
 
         if refresh {
-            calendarViewController?.refresh()
+            calendarViewController?.refresh(resetCalendarMonth: true)
         }
         calendarViewController?.view.layoutSubtreeIfNeeded()
         panel.setContentSize(calendarViewController?.view.fittingSize ?? panel.frame.size)
@@ -267,6 +267,9 @@ final class CalendarPopoverViewController: NSViewController {
         header.edgeInsets = NSEdgeInsets(top: 12, left: 16, bottom: 10, right: 16)
 
         let calendarContainer = NSView()
+        monthView.onSelectDate = { [weak self] date in
+            self?.openCalendar(on: date)
+        }
         calendarContainer.addSubview(monthView)
         monthView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -309,14 +312,25 @@ final class CalendarPopoverViewController: NSViewController {
         refresh()
     }
 
-    func refresh() {
+    func refresh(resetCalendarMonth: Bool = false) {
         guard isViewLoaded else { return }
         let now = Date.now
         timeLabel.stringValue = now.formatted(date: .omitted, time: .shortened)
         dateLabel.stringValue = now.formatted(Date.FormatStyle().weekday(.wide).month(.wide).day().year())
         monthView.setShowsWeekNumbers(UserDefaults.standard.bool(forKey: "showWeekNumbers"))
-        monthView.showToday()
+        if resetCalendarMonth {
+            monthView.showToday()
+        } else {
+            monthView.refreshToday()
+        }
         upcomingEventsView.refresh()
+    }
+
+    private func openCalendar(on date: Date) {
+        dismissPanel()
+        let startOfDay = Calendar.autoupdatingCurrent.startOfDay(for: date)
+        guard let url = URL(string: "calshow:\(startOfDay.timeIntervalSinceReferenceDate)") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private func separator() -> NSBox {
