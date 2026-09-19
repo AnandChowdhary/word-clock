@@ -288,6 +288,18 @@ final class MenuRowButton: NSButton {
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        if isPressed || isHovered {
+            let fillColor = isPressed
+                ? NSColor.unemphasizedSelectedContentBackgroundColor
+                : NSColor.labelColor.withAlphaComponent(0.08)
+            fillColor.setFill()
+            NSBezierPath(
+                roundedRect: bounds,
+                xRadius: min(9, bounds.height / 2),
+                yRadius: min(9, bounds.height / 2)
+            ).fill()
+        }
+
         let paragraph = NSMutableParagraphStyle()
         paragraph.alignment = .left
         paragraph.lineBreakMode = .byTruncatingTail
@@ -309,14 +321,6 @@ final class MenuRowButton: NSButton {
     }
 
     private func updateHoverAppearance() {
-        let color: NSColor
-        if isPressed {
-            color = .unemphasizedSelectedContentBackgroundColor
-        } else if isHovered {
-            color = .labelColor.withAlphaComponent(0.08)
-        } else {
-            color = .clear
-        }
-        layer?.backgroundColor = color.cgColor
+        needsDisplay = true
     }
 }

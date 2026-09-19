@@ -181,8 +181,6 @@ private final class CalendarEventRowButton: NSButton {
     private var isHovered = false
     private var trackingAreaReference: NSTrackingArea?
 
-    override var wantsUpdateLayer: Bool { true }
-
     init(event: UpcomingCalendarEvent, onOpen: @escaping (UpcomingCalendarEvent) -> Void) {
         self.event = event
         self.onOpen = onOpen
@@ -253,15 +251,19 @@ private final class CalendarEventRowButton: NSButton {
         updateHoverAppearance()
     }
 
-    override func updateLayer() {
-        super.updateLayer()
-        updateHoverAppearance()
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        guard isHovered else { return }
+        NSColor.labelColor.withAlphaComponent(0.08).setFill()
+        NSBezierPath(
+            roundedRect: bounds,
+            xRadius: min(9, bounds.height / 2),
+            yRadius: min(9, bounds.height / 2)
+        ).fill()
     }
 
     private func updateHoverAppearance() {
-        layer?.backgroundColor = isHovered
-            ? NSColor.labelColor.withAlphaComponent(0.08).cgColor
-            : NSColor.clear.cgColor
+        needsDisplay = true
     }
 
     @objc private func openEvent() {
