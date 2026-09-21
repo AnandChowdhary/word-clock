@@ -2,6 +2,7 @@
 set -euo pipefail
 
 project_root="${0:A:h:h}"
+mkdir -p "$project_root/work"
 
 swiftc \
     "$project_root/Sources/WordClock/WordTimeFormatter.swift" \
