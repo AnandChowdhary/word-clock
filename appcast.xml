@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>WordClock</title>
+        <item>
+            <title>0.3.0</title>
+            <pubDate>Mon, 21 Sep 2026 07:39:15 +0000</pubDate>
+            <link>https://github.com/AnandChowdhary/word-clock</link>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description sparkle:format="markdown"><![CDATA[Handle the first Sparkle appcast release
+
+]]></description>
+            <enclosure url="https://github.com/AnandChowdhary/word-clock/releases/download/v0.3.0/WordClock-universal.zip" length="1179813" type="application/octet-stream" sparkle:edSignature="t3QqbK03r1e8Mm2mYVZRA/LHIYaAJ8NEK+144f2XHtcC4pnxkOTfIO12z0OtN8Pg2lpOz/pALCfHwbZ/X5KeAQ=="/>
+        </item>
+    </channel>
+</rss>
