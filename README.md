@@ -6,6 +6,8 @@
 
 A small, native macOS menu-bar clock that writes the current time in words and keeps your calendar one click away.
 
+Word Clock was inspired by **Fuzzy Time**, an app I used for many years and loved for its simple, human way of showing the time. This project carries that idea forward as a modern native macOS app, with a calendar and quick access to upcoming events.
+
 ## Highlights
 
 - Speaks the time naturally, such as **“ten past four”** or **“quarter to five”**
