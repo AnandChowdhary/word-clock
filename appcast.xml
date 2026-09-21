@@ -3,6 +3,18 @@
     <channel>
         <title>WordClock</title>
         <item>
+            <title>0.3.1</title>
+            <pubDate>Mon, 21 Sep 2026 07:59:02 +0000</pubDate>
+            <link>https://github.com/AnandChowdhary/word-clock</link>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <description sparkle:format="markdown"><![CDATA[Add Word Clock app icon
+
+]]></description>
+            <enclosure url="https://github.com/AnandChowdhary/word-clock/releases/download/v0.3.1/WordClock-universal.zip" length="3143753" type="application/octet-stream" sparkle:edSignature="50RwUKNfDIjClmrtkgI7n7ipdUaMKjk+b9Pt0ysS4NMLnpI7habN0H3OERjs6/KIrybNfZC/hsh4Pdajq8iGAg=="/>
+        </item>
+        <item>
             <title>0.3.0</title>
             <pubDate>Mon, 21 Sep 2026 07:39:15 +0000</pubDate>
             <link>https://github.com/AnandChowdhary/word-clock</link>
