@@ -262,9 +262,6 @@ final class CalendarPopoverViewController: NSViewController {
             let glass = NSGlassEffectView()
             glass.style = .regular
             glass.cornerRadius = 14
-            if #available(macOS 27.0, *) {
-                glass.effectIsInteractive = true
-            }
             let host = NSView()
             glass.contentView = host
             root = glass
