@@ -17,6 +17,7 @@ A small, native macOS menu-bar clock that writes the current time in words and k
 - Can hide all-day events or events with fewer than two participants
 - Supports exact-minute wording or five-minute rounding
 - Optional weekday, lowercase text, configurable look-ahead, and launch at login
+- Native “Check for Updates…” flow with automatic launch-time checks
 - Uses AppKit, EventKit, ServiceManagement, SF Symbols, and native macOS materials
 - Runs entirely in the menu bar with no Dock icon
 
@@ -30,6 +31,8 @@ A small, native macOS menu-bar clock that writes the current time in words and k
 Download the latest universal build from [GitHub Releases](https://github.com/AnandChowdhary/word-clock/releases/latest).
 
 The downloadable build is ad-hoc signed rather than notarized. On first launch, macOS may require you to approve it in **System Settings → Privacy & Security**.
+
+Word Clock uses [Sparkle](https://sparkle-project.org/) for secure updates. Automatic checks and automatic installation can be controlled independently in General settings.
 
 ## Build from source
 
@@ -66,6 +69,7 @@ Support/              App metadata and privacy descriptions
 Tests/Runner/         Lightweight formatter checks
 scripts/              Build and test scripts
 assets/               README imagery
+.github/workflows/     Signed release and appcast automation
 ```
 
 ## License

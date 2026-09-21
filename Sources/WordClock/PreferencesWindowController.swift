@@ -1,17 +1,18 @@
 import AppKit
 import ServiceManagement
+import Sparkle
 
 final class PreferencesWindowController: NSWindowController {
-    init() {
+    init(updater: SPUUpdater) {
         let tabs = NSTabViewController()
         tabs.tabStyle = .toolbar
-        tabs.addTabViewItem(Self.tab(label: "General", symbol: "gearshape", controller: GeneralSettingsViewController()))
+        tabs.addTabViewItem(Self.tab(label: "General", symbol: "gearshape", controller: GeneralSettingsViewController(updater: updater)))
         tabs.addTabViewItem(Self.tab(label: "Calendar", symbol: "calendar", controller: CalendarSettingsViewController()))
         tabs.addTabViewItem(Self.tab(label: "Appearance", symbol: "paintbrush", controller: AppearanceSettingsViewController()))
         tabs.addTabViewItem(Self.tab(label: "About", symbol: "info.circle", controller: AboutViewController()))
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 440, height: 260),
+            contentRect: NSRect(x: 0, y: 0, width: 440, height: 300),
             styleMask: [.titled, .closable, .miniaturizable],
             backing: .buffered,
             defer: false
@@ -69,7 +70,7 @@ private class SettingsPaneViewController: NSViewController {
     }
 
     func paneView(rows: [NSView]) -> NSView {
-        let root = NSView(frame: NSRect(x: 0, y: 0, width: 440, height: 260))
+        let root = NSView(frame: NSRect(x: 0, y: 0, width: 440, height: 300))
         let stack = NSStackView(views: rows)
         stack.orientation = .vertical
         stack.alignment = .leading
@@ -96,14 +97,26 @@ private class SettingsPaneViewController: NSViewController {
 }
 
 private final class GeneralSettingsViewController: SettingsPaneViewController {
+    private let updater: SPUUpdater
     private let weekdaySwitch = NSSwitch()
     private let roundingSwitch = NSSwitch()
     private let loginSwitch = NSSwitch()
+    private let updateCheckSwitch = NSSwitch()
+    private let automaticDownloadSwitch = NSSwitch()
+
+    init(updater: SPUUpdater) {
+        self.updater = updater
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { nil }
 
     override func loadView() {
         weekdaySwitch.state = defaults.bool(forKey: "showWeekday") ? .on : .off
         roundingSwitch.state = defaults.bool(forKey: "roundToFive") ? .on : .off
         loginSwitch.state = SMAppService.mainApp.status == .enabled ? .on : .off
+        updateCheckSwitch.state = updater.automaticallyChecksForUpdates ? .on : .off
+        automaticDownloadSwitch.state = updater.automaticallyDownloadsUpdates ? .on : .off
 
         weekdaySwitch.target = self
         weekdaySwitch.action = #selector(weekdayChanged)
@@ -111,6 +124,10 @@ private final class GeneralSettingsViewController: SettingsPaneViewController {
         roundingSwitch.action = #selector(roundingChanged)
         loginSwitch.target = self
         loginSwitch.action = #selector(loginChanged)
+        updateCheckSwitch.target = self
+        updateCheckSwitch.action = #selector(updateCheckChanged)
+        automaticDownloadSwitch.target = self
+        automaticDownloadSwitch.action = #selector(automaticDownloadChanged)
 
         let menuBarRows = NSStackView(views: [
             switchRow("Show weekday in menu bar", control: weekdaySwitch),
@@ -126,10 +143,21 @@ private final class GeneralSettingsViewController: SettingsPaneViewController {
         systemRows.alignment = .leading
         systemRows.widthAnchor.constraint(equalToConstant: 384).isActive = true
 
+        let updateRows = NSStackView(views: [
+            switchRow("Automatically check for updates", control: updateCheckSwitch),
+            switchRow("Download and install updates automatically", control: automaticDownloadSwitch)
+        ])
+        updateRows.orientation = .vertical
+        updateRows.alignment = .leading
+        updateRows.spacing = 4
+        updateRows.widthAnchor.constraint(equalToConstant: 384).isActive = true
+
         view = paneView(rows: [
             sectionLabel("MENU BAR"), menuBarRows,
-            sectionLabel("SYSTEM"), systemRows
+            sectionLabel("SYSTEM"), systemRows,
+            sectionLabel("UPDATES"), updateRows
         ])
+        updateUpdateControls()
     }
 
     override func viewWillAppear() {
@@ -160,6 +188,19 @@ private final class GeneralSettingsViewController: SettingsPaneViewController {
             alert.informativeText = error.localizedDescription
             alert.runModal()
         }
+    }
+
+    @objc private func updateCheckChanged() {
+        updater.automaticallyChecksForUpdates = updateCheckSwitch.state == .on
+        updateUpdateControls()
+    }
+
+    @objc private func automaticDownloadChanged() {
+        updater.automaticallyDownloadsUpdates = automaticDownloadSwitch.state == .on
+    }
+
+    private func updateUpdateControls() {
+        automaticDownloadSwitch.isEnabled = updateCheckSwitch.state == .on
     }
 }
 

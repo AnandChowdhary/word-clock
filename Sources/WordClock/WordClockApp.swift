@@ -1,4 +1,5 @@
 import AppKit
+import Sparkle
 
 extension Notification.Name {
     static let wordClockPreferencesChanged = Notification.Name("WordClockPreferencesChanged")
@@ -17,6 +18,11 @@ enum WordClockMain {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private var panel: StatusPanel?
     private var calendarViewController: CalendarPopoverViewController?
@@ -45,11 +51,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let calendarViewController = CalendarPopoverViewController(
             showPreferences: { [weak self] in self?.showPreferences() },
+            checkForUpdates: { [weak self] in self?.checkForUpdates() },
             dismissPanel: { [weak self] in self?.hidePanel() }
         )
         self.calendarViewController = calendarViewController
         panel = StatusPanel(contentViewController: calendarViewController)
         installDismissMonitors()
+
+        if updaterController.updater.automaticallyChecksForUpdates {
+            updaterController.updater.checkForUpdatesInBackground()
+        }
 
         updateStatusTitle()
         timer = Timer.scheduledTimer(
@@ -168,11 +179,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showPreferences() {
         hidePanel()
         if preferencesWindowController == nil {
-            preferencesWindowController = PreferencesWindowController()
+            preferencesWindowController = PreferencesWindowController(updater: updaterController.updater)
         }
         preferencesWindowController?.showWindow(nil)
         preferencesWindowController?.window?.center()
         NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    private func checkForUpdates() {
+        hidePanel()
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        updaterController.checkForUpdates(nil)
     }
 }
 
@@ -217,14 +234,20 @@ final class CalendarPopoverViewController: NSViewController {
     private let monthView = CalendarMonthView()
     private let eventProvider = CalendarEventProvider()
     private let showPreferences: () -> Void
+    private let checkForUpdates: () -> Void
     private let dismissPanel: () -> Void
     private lazy var upcomingEventsView = UpcomingEventsView(
         provider: eventProvider,
         dismissPanel: dismissPanel
     )
 
-    init(showPreferences: @escaping () -> Void, dismissPanel: @escaping () -> Void) {
+    init(
+        showPreferences: @escaping () -> Void,
+        checkForUpdates: @escaping () -> Void,
+        dismissPanel: @escaping () -> Void
+    ) {
         self.showPreferences = showPreferences
+        self.checkForUpdates = checkForUpdates
         self.dismissPanel = dismissPanel
         super.init(nibName: nil, bundle: nil)
     }
@@ -279,6 +302,7 @@ final class CalendarPopoverViewController: NSViewController {
         ])
 
         let preferencesButton = rowButton(title: "Preferences…", action: #selector(openPreferences))
+        let updatesButton = rowButton(title: "Check for Updates…", action: #selector(runUpdateCheck))
         let quitButton = rowButton(title: "Quit", action: #selector(quit))
         quitButton.keyEquivalent = "q"
         quitButton.keyEquivalentModifierMask = .command
@@ -288,6 +312,8 @@ final class CalendarPopoverViewController: NSViewController {
             separator(),
             calendarContainer,
             upcomingEventsView,
+            separator(),
+            buttonContainer(updatesButton),
             separator(),
             buttonContainer(preferencesButton),
             separator(),
@@ -396,5 +422,6 @@ final class CalendarPopoverViewController: NSViewController {
     }
 
     @objc private func openPreferences() { showPreferences() }
+    @objc private func runUpdateCheck() { checkForUpdates() }
     @objc private func quit() { NSApplication.shared.terminate(nil) }
 }

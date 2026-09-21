@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-26
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test and build
+        run: |
+          ./scripts/test.sh
+          ./scripts/build-app.sh
+
+      - name: Verify app bundle
+        run: |
+          codesign --verify --deep --strict --verbose=2 outputs/WordClock.app
+          file outputs/WordClock.app/Contents/MacOS/WordClock | grep "universal binary"
+          test -d outputs/WordClock.app/Contents/Frameworks/Sparkle.framework
+
+      - name: Package release
+        run: |
+          mkdir -p "$RUNNER_TEMP/feed"
+          (cd outputs && /usr/bin/zip -qry -X "$RUNNER_TEMP/feed/WordClock-universal.zip" WordClock.app)
+          git log -1 --pretty=%B > "$RUNNER_TEMP/feed/WordClock-universal.md"
+          if git show origin/main:appcast.xml > "$RUNNER_TEMP/feed/appcast.xml" 2>/dev/null; then
+            echo "Updating existing appcast"
+          fi
+
+      - name: Sign update and generate appcast
+        run: |
+          printf '%s' "$SPARKLE_PRIVATE_KEY" | \
+            work/sparkle-2.10.0/bin/generate_appcast \
+              --ed-key-file - \
+              --download-url-prefix "https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/" \
+              --link "https://github.com/${GITHUB_REPOSITORY}" \
+              --embed-release-notes \
+              --maximum-versions 3 \
+              --maximum-deltas 0 \
+              "$RUNNER_TEMP/feed"
+          grep -q "sparkle:edSignature" "$RUNNER_TEMP/feed/appcast.xml"
+
+      - name: Publish GitHub release
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "$RUNNER_TEMP/feed/WordClock-universal.zip" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              "$RUNNER_TEMP/feed/WordClock-universal.zip" \
+              --verify-tag \
+              --generate-notes \
+              --title "Word Clock ${GITHUB_REF_NAME#v}"
+          fi
+
+      - name: Publish appcast
+        run: |
+          cp "$RUNNER_TEMP/feed/appcast.xml" "$RUNNER_TEMP/appcast.xml"
+          git fetch origin main
+          git checkout -B main origin/main
+          cp "$RUNNER_TEMP/appcast.xml" appcast.xml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Sparkle appcast for $GITHUB_REF_NAME"
+            git push origin main
+          fi
