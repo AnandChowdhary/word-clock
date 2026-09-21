@@ -6,10 +6,6 @@
 
 A small, native macOS menu-bar clock that writes the current time in words and keeps your calendar one click away.
 
-<p align="center">
-  <img src="assets/word-clock-popup.png" width="250" alt="Word Clock showing the current month and upcoming calendar events">
-</p>
-
 ## Highlights
 
 - Speaks the time naturally, such as **“ten past four”** or **“quarter to five”**
@@ -24,6 +20,10 @@ A small, native macOS menu-bar clock that writes the current time in words and k
 - Native “Check for Updates…” action in About, with automatic launch-time checks
 - Uses AppKit, EventKit, ServiceManagement, SF Symbols, and native macOS materials
 - Runs entirely in the menu bar with no Dock icon
+
+<p align="center">
+  <img width="800" alt="Word Clock showing the current month and upcoming calendar events" src="https://github.com/user-attachments/assets/0d036b7c-d218-41c8-bfb8-1d37c62f8e08" />
+</p>
 
 ## Requirements
 
