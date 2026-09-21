@@ -1,5 +1,9 @@
 # Word Clock for macOS
 
+<p align="center">
+  <img src="assets/word-clock-icon.png" width="112" alt="Word Clock app icon">
+</p>
+
 A small, native macOS menu-bar clock that writes the current time in words and keeps your calendar one click away.
 
 <p align="center">
@@ -17,7 +21,7 @@ A small, native macOS menu-bar clock that writes the current time in words and k
 - Can hide all-day events or events with fewer than two participants
 - Supports exact-minute wording or five-minute rounding
 - Optional weekday, lowercase text, configurable look-ahead, and launch at login
-- Native “Check for Updates…” flow with automatic launch-time checks
+- Native “Check for Updates…” action in About, with automatic launch-time checks
 - Uses AppKit, EventKit, ServiceManagement, SF Symbols, and native macOS materials
 - Runs entirely in the menu bar with no Dock icon
 

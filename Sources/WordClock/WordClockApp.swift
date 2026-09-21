@@ -51,7 +51,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let calendarViewController = CalendarPopoverViewController(
             showPreferences: { [weak self] in self?.showPreferences() },
-            checkForUpdates: { [weak self] in self?.checkForUpdates() },
             dismissPanel: { [weak self] in self?.hidePanel() }
         )
         self.calendarViewController = calendarViewController
@@ -186,11 +185,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
 
-    private func checkForUpdates() {
-        hidePanel()
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        updaterController.checkForUpdates(nil)
-    }
 }
 
 final class StatusPanel: NSPanel {
@@ -234,7 +228,6 @@ final class CalendarPopoverViewController: NSViewController {
     private let monthView = CalendarMonthView()
     private let eventProvider = CalendarEventProvider()
     private let showPreferences: () -> Void
-    private let checkForUpdates: () -> Void
     private let dismissPanel: () -> Void
     private lazy var upcomingEventsView = UpcomingEventsView(
         provider: eventProvider,
@@ -243,11 +236,9 @@ final class CalendarPopoverViewController: NSViewController {
 
     init(
         showPreferences: @escaping () -> Void,
-        checkForUpdates: @escaping () -> Void,
         dismissPanel: @escaping () -> Void
     ) {
         self.showPreferences = showPreferences
-        self.checkForUpdates = checkForUpdates
         self.dismissPanel = dismissPanel
         super.init(nibName: nil, bundle: nil)
     }
@@ -299,7 +290,6 @@ final class CalendarPopoverViewController: NSViewController {
         ])
 
         let preferencesButton = rowButton(title: "Preferences…", action: #selector(openPreferences))
-        let updatesButton = rowButton(title: "Check for Updates…", action: #selector(runUpdateCheck))
         let quitButton = rowButton(title: "Quit", action: #selector(quit))
         quitButton.keyEquivalent = "q"
         quitButton.keyEquivalentModifierMask = .command
@@ -309,8 +299,6 @@ final class CalendarPopoverViewController: NSViewController {
             separator(),
             calendarContainer,
             upcomingEventsView,
-            separator(),
-            buttonContainer(updatesButton),
             separator(),
             buttonContainer(preferencesButton),
             separator(),
@@ -419,6 +407,5 @@ final class CalendarPopoverViewController: NSViewController {
     }
 
     @objc private func openPreferences() { showPreferences() }
-    @objc private func runUpdateCheck() { checkForUpdates() }
     @objc private func quit() { NSApplication.shared.terminate(nil) }
 }

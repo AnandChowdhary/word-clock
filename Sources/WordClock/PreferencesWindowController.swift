@@ -9,7 +9,7 @@ final class PreferencesWindowController: NSWindowController {
         tabs.addTabViewItem(Self.tab(label: "General", symbol: "gearshape", controller: GeneralSettingsViewController(updater: updater)))
         tabs.addTabViewItem(Self.tab(label: "Calendar", symbol: "calendar", controller: CalendarSettingsViewController()))
         tabs.addTabViewItem(Self.tab(label: "Appearance", symbol: "paintbrush", controller: AppearanceSettingsViewController()))
-        tabs.addTabViewItem(Self.tab(label: "About", symbol: "info.circle", controller: AboutViewController()))
+        tabs.addTabViewItem(Self.tab(label: "About", symbol: "info.circle", controller: AboutViewController(updater: updater)))
 
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 440, height: 300),
@@ -332,6 +332,15 @@ private final class AppearanceSettingsViewController: SettingsPaneViewController
 }
 
 private final class AboutViewController: NSViewController {
+    private let updater: SPUUpdater
+
+    init(updater: SPUUpdater) {
+        self.updater = updater
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
     override func loadView() {
         let root = NSView(frame: NSRect(x: 0, y: 0, width: 440, height: 230))
         let icon = NSImageView(image: NSApp.applicationIconImage)
@@ -349,7 +358,11 @@ private final class AboutViewController: NSViewController {
         detail.alignment = .center
         detail.textColor = .secondaryLabelColor
 
-        let stack = NSStackView(views: [icon, title, detail])
+        let updateButton = NSButton(title: "Check for Updates…", target: self, action: #selector(checkForUpdates))
+        updateButton.bezelStyle = .rounded
+        updateButton.controlSize = .regular
+
+        let stack = NSStackView(views: [icon, title, detail, updateButton])
         stack.orientation = .vertical
         stack.alignment = .centerX
         stack.spacing = 8
@@ -360,5 +373,10 @@ private final class AboutViewController: NSViewController {
             stack.centerYAnchor.constraint(equalTo: root.centerYAnchor)
         ])
         view = root
+    }
+
+    @objc private func checkForUpdates() {
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        updater.checkForUpdates()
     }
 }

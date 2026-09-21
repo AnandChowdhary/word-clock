@@ -56,6 +56,7 @@ rm -rf "$bundle_root"
 mkdir -p "$contents/MacOS" "$contents/Resources" "$contents/Frameworks"
 cp "$project_root/work/$app_name" "$contents/MacOS/$app_name"
 cp "Support/Info.plist" "$contents/Info.plist"
+cp "Support/WordClock.icns" "$contents/Resources/WordClock.icns"
 cp "Support/Sparkle-LICENSE.txt" "$contents/Resources/Sparkle-LICENSE.txt"
 ditto "$sparkle_root/Sparkle.framework" "$contents/Frameworks/Sparkle.framework"
 
