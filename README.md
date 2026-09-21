@@ -6,7 +6,7 @@
 
 A small, native macOS menu-bar clock that writes the current time in words and keeps your calendar one click away.
 
-Word Clock was inspired by **Fuzzy Time**, an app I used for many years and loved for its simple, human way of showing the time. This project carries that idea forward as a modern native macOS app, with a calendar and quick access to upcoming events.
+Word Clock was inspired by [Fuzzy Time](https://marcusolovsson.com/fuzzytime/) by Marcus Olovsson, an app I used for many years and loved for its simple, human way of showing the time, which in turn was inspired by FuzzyClock made by Guido Neitzer. This project carries that idea forward as a modern native macOS app, with a calendar and quick access to upcoming events.
 
 ## Highlights
 
